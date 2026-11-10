@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# 本地配置与运行数据
+.env
+data/*.db
+data/*.db-*
+data/*.sqlite
+data/*.sqlite-*
+
+# 本机工具与系统文件
+.claude/
+.DS_Store
+*.log
