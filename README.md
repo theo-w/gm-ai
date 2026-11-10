@@ -11,6 +11,7 @@ GameMaster AI 把客服培训做成一场可以“打怪升级”的实战演练
 ## 目录
 
 - [快速开始](#快速开始)
+- [部署到 Render](#部署到-render)
 - [演示路径](#演示路径)
 - [系统架构](#系统架构)
 - [核心机制](#核心机制)
@@ -76,6 +77,36 @@ set -a; source .env; set +a
 ```
 
 常用配置见[配置项](#配置项)。
+
+---
+
+## 部署到 Render
+
+仓库内置 `render.yaml`，可在 Render 上创建免费 Web Service：
+
+1. 打开 [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**，选择 GitHub 仓库 `theo-w/gm-ai`；
+2. Render 读取 `render.yaml` 后创建服务，首次部署约 3–5 分钟；
+3. 部署完成后访问分配的 `https://*.onrender.com` 域名。
+
+也可以在 **New → Web Service** 手动填写：
+
+| 配置项 | 值 |
+| --- | --- |
+| Repository | `https://github.com/theo-w/gm-ai` |
+| Runtime | Python 3（`.python-version` 固定 3.12.3） |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/api/health` |
+| Plan | Free |
+
+免费实例的限制与应对：
+
+- **本地文件易失**：免费实例没有持久磁盘，SQLite 会在重部署、重启或休眠后清空；应用启动时会自动重新建库并写入演示种子数据，适合演示，不适合保存真实数据。需要持久化时请升级付费实例并挂载磁盘，或改用 PostgreSQL（需自行替换 `app/db.py` 数据层）。
+- **休眠**：15 分钟无请求会休眠，下一次访问需约 1 分钟冷启动。
+- **线上没有 Ollama**：应用会自动使用模板台词与纯规则评分，流程完整但 AI 对话质量下降。如需真实模型，在 Render 环境变量中把 `GM_OLLAMA_URL` 指向可公网访问的 Ollama 实例（注意鉴权与暴露风险），或参考 `app/engines/llm.py` 接入云端模型网关。
+- **无登录鉴权**：当前是公开演示版，任何人都可访问和新建学员，请勿放入真实业务数据。
+
+> 注意：本环境直接访问 `render.com` 主站可能超时，但 `dashboard.render.com` 与 Render API 正常。
 
 ---
 

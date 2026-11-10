@@ -1,0 +1,19 @@
+# Render Blueprint：在 Render 上创建免费 Web Service 并自动部署
+# 使用方式：Render Dashboard → New → Blueprint → 选择本仓库
+services:
+  - type: web
+    name: gamemaster-ai
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    # Render 会注入 $PORT，必须监听 0.0.0.0
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: GM_TENANT
+        value: starsea
+      # 线上默认没有本地 Ollama，应用会自动降级为模板台词 + 纯规则评分。
+      # 如需接入可公网访问的 Ollama，在 Dashboard 手动添加 GM_OLLAMA_URL。
